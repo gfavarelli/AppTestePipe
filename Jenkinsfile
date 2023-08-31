@@ -1,27 +1,27 @@
 pipeline {
     agent any
-
+     tools { 
+        nodejs "Node 16.20.2" 
+    }
+    
     stages {
         stage('Checkout') {
             steps {
-                // Checkout your code from the repository
-                // This step will depend on your version control system
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/gfavarelli/AppTestePipe.git']]])
             }
         }
         
-        stage('Run Tests') {
+        stage('Build') {
             steps {
-                script {
-                    if (env.RUN_TESTS == 'true') {
-			echo 'RUNNING TESTS'
-                        sh './gradlew clean test --tests "*.*.*SearchTest"'
-                    } else {
-                        echo 'No search-related changes detected. Skipping search tests.'
-                    }
-                }
+                sh 'npm install'
+                sh 'npm run build'
             }
         }
         
-        // Other stages...
+        stage('Run Unit Tests') {
+            steps {
+                sh 'npm run test'
+            }
+        }
     }
 }
